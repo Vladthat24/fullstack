@@ -73,8 +73,17 @@
 
           <Upload
             type="drag"
+            :headers="{
+              'x-csrf-token': token,
+              'X-Requested-With': 'XMLHttpRequest',
+            }"
+            :on-success="handleSuccess"
+            :format="['jpg', 'jpeg', 'png']"
+            :max-size="2048"
+            :on-error="handlerError"
+            :on-format-error="handleFormatError"
+            :on-exceeded-size="handlerMaxSize"
             action="/app/upload"
-            :headers="{ 'x-csrf-token': token }"
           >
             <div style="padding: 20px 0">
               <Icon
@@ -85,6 +94,14 @@
               <p>Click or drag files here to upload</p>
             </div>
           </Upload>
+
+          <div class="demo-upload-list" v-if="data.iconImage">
+            <img :src="`/uploads/{data.iconImage}`" />
+            <div class="demo-upload-list-cover">
+              <Icon type="ios-trash-outline"></Icon>
+            </div>
+          </div>
+
           <div slot="footer">
             <Button type="default" @click="addModal = false">Close</Button>
             <Button
@@ -148,7 +165,8 @@ export default {
   data() {
     return {
       data: {
-        tagName: "",
+        iconImage: "",
+        categoryName: "",
       },
       addModal: false,
       editModal: false,
@@ -225,6 +243,37 @@ export default {
       this.deletingIndex = i;
       this.showDeleteModal = true;
     },
+    handleSuccess(res, file) {
+      this.data.iconImage = res;
+    },
+    handlerError(res, file) {
+      console.log("res", res);
+      console.log("file", file);
+      this.$Notice.warning({
+        title: "The file format is incorrect",
+        desc: `${
+          file.errors.file.length
+            ? file.errors.file[0]
+            : "Something went wrong!"
+        }`,
+      });
+    },
+    handleFormatError(file) {
+      console.log(data.iconImage);
+      this.$Notice.warning({
+        title: "The file format is incorrect",
+        desc:
+          "File format of " +
+          file.name +
+          "is incorrect, please select jpg or png",
+      });
+    },
+    handlerMaxSize(file) {
+      this.$Notice.warning({
+        title: "Exceeding file size limit",
+        desc: "File " + file.name + "is too large, no more than 2M",
+      });
+    },
   },
   async created() {
     this.token = window.Laravel.csrfToken;
@@ -235,16 +284,5 @@ export default {
       this.swr();
     }
   },
-  /*   async created() {
-    const res = await this.callApi("post", "/app/create_tag", {
-      tagName: "testtag",
-    });
-
-    if (res.status == 200) {
-      console.log(res);
-    } else {
-      console.log("running");
-    }
-  }, */
 };
 </script>

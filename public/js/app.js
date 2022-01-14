@@ -2229,11 +2229,29 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   data: function data() {
     return {
       data: {
-        tagName: ""
+        iconImage: "",
+        categoryName: ""
       },
       addModal: false,
       editModal: false,
@@ -2389,6 +2407,30 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       this.deleteItem = tag;
       this.deletingIndex = i;
       this.showDeleteModal = true;
+    },
+    handleSuccess: function handleSuccess(res, file) {
+      this.data.iconImage = res;
+    },
+    handlerError: function handlerError(res, file) {
+      console.log("res", res);
+      console.log("file", file);
+      this.$Notice.warning({
+        title: "The file format is incorrect",
+        desc: "".concat(file.errors.file.length ? file.errors.file[0] : "Something went wrong!")
+      });
+    },
+    handleFormatError: function handleFormatError(file) {
+      console.log(data.iconImage);
+      this.$Notice.warning({
+        title: "The file format is incorrect",
+        desc: "File format of " + file.name + "is incorrect, please select jpg or png"
+      });
+    },
+    handlerMaxSize: function handlerMaxSize(file) {
+      this.$Notice.warning({
+        title: "Exceeding file size limit",
+        desc: "File " + file.name + "is too large, no more than 2M"
+      });
     }
   },
   created: function created() {
@@ -2421,17 +2463,6 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       }, _callee4);
     }))();
   }
-  /*   async created() {
-    const res = await this.callApi("post", "/app/create_tag", {
-      tagName: "testtag",
-    });
-     if (res.status == 200) {
-      console.log(res);
-    } else {
-      console.log("running");
-    }
-  }, */
-
 });
 
 /***/ }),
@@ -68478,8 +68509,17 @@ var render = function () {
                 {
                   attrs: {
                     type: "drag",
+                    headers: {
+                      "x-csrf-token": _vm.token,
+                      "X-Requested-With": "XMLHttpRequest",
+                    },
+                    "on-success": _vm.handleSuccess,
+                    format: ["jpg", "jpeg", "png"],
+                    "max-size": 2048,
+                    "on-error": _vm.handlerError,
+                    "on-format-error": _vm.handleFormatError,
+                    "on-exceeded-size": _vm.handlerMaxSize,
                     action: "/app/upload",
-                    headers: { "x-csrf-token": _vm.token },
                   },
                 },
                 [
@@ -68498,6 +68538,19 @@ var render = function () {
                   ),
                 ]
               ),
+              _vm._v(" "),
+              _vm.data.iconImage
+                ? _c("div", { staticClass: "demo-upload-list" }, [
+                    _c("img", { attrs: { src: "/uploads/{data.iconImage}" } }),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      { staticClass: "demo-upload-list-cover" },
+                      [_c("Icon", { attrs: { type: "ios-trash-outline" } })],
+                      1
+                    ),
+                  ])
+                : _vm._e(),
               _vm._v(" "),
               _c(
                 "div",
