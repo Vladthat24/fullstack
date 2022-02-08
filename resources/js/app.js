@@ -1,16 +1,18 @@
-require('./bootstrap');
+require("./bootstrap");
 
-window.Vue = require('vue').default;
-import router from './router'
-import ViewUI from 'view-design';
-import 'view-design/dist/styles/iview.css';
+window.Vue = require("vue").default;
+import router from "./router";
+import store from "./store";
+import ViewUI from "view-design";
+import "view-design/dist/styles/iview.css";
 Vue.use(ViewUI);
 
-import common from './common';
+import common from "./common";
 Vue.mixin(common);
 
-Vue.component('mainapp', require('./component/mainapp.vue').default)
+Vue.component("mainapp", require("./component/mainapp.vue").default);
 const app = new Vue({
-    el: '#app',
-    router
-})
+    el: "#app",
+    router,
+    store,
+});
