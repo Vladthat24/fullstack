@@ -1,6 +1,11 @@
 <template>
     <div>
-        <Modal :value="getDeleteModalObj.showDeleteModal" width="360">
+        <Modal
+            :value="getDeleteModalObj.showDeleteModal"
+            :mask-closable="false"
+            :closable="false"
+            width="360"
+        >
             <p slot="header" style="color: #f60; text-align: center">
                 <Icon type="ios-information-circle"></Icon>
                 <span>Delete confirmation</span>
@@ -10,9 +15,15 @@
             </div>
             <div slot="footer">
                 <Button
+                    type="default"
+                    size="large"
+                    :disabled="isDeleing"
+                    @click="closeModal"
+                    >Close
+                </Button>
+                <Button
                     type="error"
                     size="large"
-                    long
                     :loading="isDeleing"
                     :disabled="isDeleing"
                     @click="deleteTag"
@@ -25,7 +36,33 @@
 
 <script>
 import { mapGetters } from "vuex";
+
 export default {
+    data() {
+        return {
+            isDeleing: false,
+        };
+    },
+    methods: {
+        async deleteTag() {
+            this.isDeleing = true;
+            const res = await this.callApi(
+                "post",
+                this.getDeleteModalObj.deleteUrl,
+                this.getDeleteModalObj.data
+            );
+            if (res.status === 200) {
+                this.c("Tag has been deleted successsfully");
+                this.$store.commit("setDeleteModal", true);
+            } else {
+                this.swr();
+                this.$store.commit("setDeleteModal", false);
+            }
+        },
+        closeModal() {
+            this.$store.commit("setDeleteModal", false);
+        },
+    },
     computed: {
         ...mapGetters(["getDeleteModalObj"]),
     },

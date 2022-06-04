@@ -10,6 +10,8 @@ export default new vuex.Store({
             showDeleteModal: false,
             deleteUrl: "",
             data: null,
+            deletingIndex: -1,
+            isDeleted: false,
         },
     },
     getters: {
@@ -17,6 +19,21 @@ export default new vuex.Store({
             return state.deleteModalObj;
         },
     },
-    mutations: {},
+    mutations: {
+        setDeleteModal(state, data) {
+            const deleteModalObj = {
+                showDeleteModal: false,
+                deleteUrl: "",
+                data: null,
+                deletingIndex: -1,
+                isDeleted: data,
+            };
+            state.deleteModalObj = deleteModalObj;
+            /*            state.deleteModalObj.isDeleted = data; */
+        },
+        setDeletingModalObj(state, data) {
+            state.deleteModalObj = data;
+        },
+    },
     actions: {},
 });

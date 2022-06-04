@@ -108,7 +108,7 @@
                     </Upload>
 
                     <div class="demo-upload-list" v-if="data.iconImage">
-                        <img :src="`/uploads/${data.iconImage}`" />
+                        <img :src="`${data.iconImage}`" />
                         <div class="demo-upload-list-cover">
                             <Icon
                                 type="ios-trash-outline"
@@ -198,32 +198,16 @@
                     </div>
                 </Modal>
                 <!-- TAG ELIMINAR MODAL -->
-                <Modal v-model="showDeleteModal" width="360">
-                    <p slot="header" style="color: #f60; text-align: center">
-                        <Icon type="ios-information-circle"></Icon>
-                        <span>Delete confirmation</span>
-                    </p>
-                    <div style="text-align: center">
-                        <p>Are yout sure you want to delete tag?</p>
-                    </div>
-                    <div slot="footer">
-                        <Button
-                            type="error"
-                            size="large"
-                            long
-                            :loading="isDeleing"
-                            :disabled="isDeleing"
-                            @click="deleteTag"
-                            >Delete
-                        </Button>
-                    </div>
-                </Modal>
+
+                <deleteModal></deleteModal>
             </div>
         </div>
     </div>
 </template>
 
 <script>
+import deleteModal from "../components/deleteModal.vue";
+import { mapGetters } from "vuex";
 export default {
     data() {
         return {
@@ -256,7 +240,8 @@ export default {
                 return this.error("Category name is requeird");
             if (this.data.iconImage.trim() == "")
                 return this.error("Icon image is required");
-            this.data.iconImage = `/uploads/${this.data.iconImage}`;
+            /* this.data.iconImage = `/uploads/${this.data.iconImage}`; */
+            this.data.iconImage = `${this.data.iconImage}`;
             const res = await this.callApi(
                 "post",
                 "app/create_category",
@@ -317,27 +302,22 @@ export default {
             this.index = index;
             this.isEditingItem = true;
         },
-        //ELIMINAR
-        async deleteTag() {
-            this.isDeleing = true;
-            const res = await this.callApi(
-                "post",
-                "app/delete_tag",
-                this.deleteItem
-            );
-            if (res.status === 200) {
-                this.tags.splice(this.deletingIndex, 1);
-                this.c("Tag has been deleted successsfully");
-            } else {
-                this.swr();
-            }
-            this.isDeleing = false;
-            this.showDeleteModal = false;
-        }, //SHOW MODAL PARA ELIMINAR
-        showDeletingModal(tag, i) {
+
+        //SHOW MODAL PARA ELIMINAR
+        showDeletingModal(category, i) {
+            const deleteModalObj = {
+                showDeleteModal: true,
+                deleteUrl: "app/delete_category",
+                data: category,
+                deletingIndex: i,
+                isDeleted: false,
+            };
+            this.$store.commit("setDeletingModalObj", deleteModalObj);
+            /*
             this.deleteItem = tag;
             this.deletingIndex = i;
             this.showDeleteModal = true;
+            */
         },
         handleSuccess(res, file) {
             res = `/uploads/${res}`;
@@ -406,6 +386,21 @@ export default {
         } else {
             this.swr();
         }
+    },
+    components: {
+        deleteModal,
+    },
+    //Para visualizar y actualizar lo eliminado
+    computed: {
+        ...mapGetters(["getDeleteModalObj"]),
+    },
+    watch: {
+        getDeleteModalObj(obj) {
+            console.log(obj);
+            if (obj.isDeleted) {
+                this.categoryList.splice(obj.deletingIndex, 1);
+            }
+        },
     },
 };
 </script>
